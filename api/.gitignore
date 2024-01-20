@@ -224,3 +224,5 @@ sketch
 *.vsix
 .history
 .ionide
+.migrations.properties
+neo4j-migrations
