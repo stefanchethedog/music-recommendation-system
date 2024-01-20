@@ -14,10 +14,8 @@ public interface IUserRepository {
 public class UserRepository : IUserRepository
 {
     private readonly IDriver _driver;
-    private readonly Microsoft.Extensions.Logging.ILogger _logger;
     public UserRepository(IDriver driver, Microsoft.Extensions.Logging.ILogger logger) {
         _driver = driver;
-        _logger = logger;
     }
     public Task<User> Create(User user)
     {
@@ -34,13 +32,12 @@ public class UserRepository : IUserRepository
         var session = _driver.AsyncSession();
         return (IEnumerable<User>)await session.ExecuteReadAsync(async (trans) => {
             var cursor = await trans.RunAsync(@"
-                MATCH (u:User) RETURN u
+                MATCH (u:User) RETURN u { .id, .username } as u
             ");
             return await cursor.ToListAsync(rec => {
-                _logger.LogDebug(rec.ToString());
                 return new User(
-                    rec["properties.id"].As<int>(),
-                    rec["properties.username"].As<string>()
+                    rec["id"].As<int>(),
+                    rec["username"].As<string>()
                 );});
         });
     }
