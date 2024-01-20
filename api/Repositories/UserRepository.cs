@@ -14,7 +14,7 @@ public interface IUserRepository {
 public class UserRepository : IUserRepository
 {
     private readonly IDriver _driver;
-    public UserRepository(IDriver driver, Microsoft.Extensions.Logging.ILogger logger) {
+    public UserRepository(IDriver driver) {
         _driver = driver;
     }
     public Task<User> Create(User user)
