@@ -1,5 +1,6 @@
 using models;
 using Neo4j.Driver;
+using Neo4j.Driver.Preview.Mapping;
 
 namespace repositories;
 
@@ -35,10 +36,8 @@ public class UserRepository : IUserRepository
                 MATCH (u:User) RETURN u { .id, .username } as u
             ");
             return await cursor.ToListAsync(rec => {
-                return new User(
-                    rec["id"].As<int>(),
-                    rec["username"].As<string>()
-                );});
+                    return rec.AsObject<User>();
+                ;});
         });
     }
 

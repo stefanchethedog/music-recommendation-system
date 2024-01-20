@@ -7,6 +7,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ISongRepository, SongRepository>();
 builder.Services.AddSingleton(GraphDatabase.Driver(Environment.GetEnvironmentVariable("NEO4J_URL") ?? "neo4j://localhost:7687"));
 
 var app = builder.Build();
