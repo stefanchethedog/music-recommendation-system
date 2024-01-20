@@ -10,6 +10,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
 builder.Services.AddScoped<IGenreRepository, GenreRepository>();
 builder.Services.AddScoped<ISongRepository, SongRepository>();
+builder.Services.AddScoped<IArtistRepository, ArtistRepository>();
 builder.Services.AddSingleton(GraphDatabase.Driver(Environment.GetEnvironmentVariable("NEO4J_URL") ?? "neo4j://localhost:7687"));
 
 var app = builder.Build();
