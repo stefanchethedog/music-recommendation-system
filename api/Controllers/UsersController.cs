@@ -6,7 +6,7 @@ using UpdateUser = models.CreateUser;
 namespace MusicRecommendationEngineAPI.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("users")]
 public class UsersController : ControllerBase
 {
     private readonly IUserRepository _repo;
