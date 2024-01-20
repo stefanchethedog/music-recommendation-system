@@ -55,8 +55,8 @@ public class UserRepository : IUserRepository
                 RETURN u { .id, .username };
             ");
             return await cursor.ToListAsync(rec => {
-                return rec.AsObject<User>();
-            ;});
+                    return rec.AsObject<User>();
+                ;});
         });
     }
 
