@@ -1,14 +1,15 @@
 using models;
 using Neo4j.Driver;
+using Neo4j.Driver.Preview.Mapping;
 
 namespace repositories;
 
 public interface IUserRepository {
     Task<IEnumerable<User>> FindAll();
-    Task<User> FindOne(int id);
+    Task<User?> FindOne(string id);
     Task<User> Create(User user);
-    Task<User> Delete(int id);
-    Task<User> Update(int id, User user);
+    Task<User?> Delete(string id);
+    Task<User?> Update(string id, string username);
 }
 
 public class UserRepository : IUserRepository
@@ -17,38 +18,77 @@ public class UserRepository : IUserRepository
     public UserRepository(IDriver driver) {
         _driver = driver;
     }
-    public Task<User> Create(User user)
+    public async Task<User> Create(User user)
     {
-        throw new NotImplementedException();
+        var session = _driver.AsyncSession();
+        return await session.ExecuteWriteAsync(async trans => {
+            var cursor = await trans.RunAsync(@"
+                CREATE (u:User {id: $id, username: $username}) 
+                RETURN u {.id, .username};
+            ", new { id = user.Id, username = user.Username});
+            return await cursor.SingleAsync(rec => rec.AsObject<User>());
+        });
     }
 
-    public Task<User> Delete(int id)
+    public async Task<User?> Delete(string id)
     {
-        throw new NotImplementedException();
+        var session = _driver.AsyncSession();
+        return await session.ExecuteWriteAsync(async trans => {
+            var cursor = await trans.RunAsync(@"
+                MATCH (u:User {id: $id}) 
+                WITH u, u.id AS id, u.username AS username 
+                DETACH DELETE u RETURN id, username;
+            ", new { id });
+            if(await cursor.FetchAsync()) {
+                return cursor.Current.AsObject<User>();
+            }
+            return null;
+        });
     }
 
     public async Task<IEnumerable<User>> FindAll()
     {
         var session = _driver.AsyncSession();
-        return (IEnumerable<User>)await session.ExecuteReadAsync(async (trans) => {
+        return await session.ExecuteReadAsync(async (trans) => {
             var cursor = await trans.RunAsync(@"
-                MATCH (u:User) RETURN u { .id, .username } as u
+                MATCH (u:User) 
+                RETURN u { .id, .username };
             ");
             return await cursor.ToListAsync(rec => {
-                return new User(
-                    rec["id"].As<int>(),
-                    rec["username"].As<string>()
-                );});
+                return rec.AsObject<User>();
+            });
         });
     }
 
-    public Task<User> FindOne(int id)
+    public async Task<User?> FindOne(string id)
     {
-        throw new NotImplementedException();
+        var session = _driver.AsyncSession();
+        return await session.ExecuteReadAsync(async (trans) => {
+            var cursor = await trans.RunAsync(@"
+                MATCH (u:User) WHERE u.id = $id 
+                RETURN u {.id, .username}
+            ", new { id });
+            if(await cursor.FetchAsync()){
+                return cursor.Current.AsObject<User>();
+            }
+            else { return null; }
+        });
     }
 
-    public Task<User> Update(int id, User user)
+    public async Task<User?> Update(string id, string username)
     {
-        throw new NotImplementedException();
+        var session = _driver.AsyncSession();
+        return await session.ExecuteWriteAsync(async (trans) => {
+            var cursor = await trans.RunAsync(@"
+                OPTIONAL MATCH (user:User {id: $id}) 
+                WITH user WHERE user IS NOT NULL 
+                SET user.username = $username RETURN user {.id, .username}
+            ", new { id, username});
+            if(await cursor.FetchAsync()){
+                return cursor.Current.AsObject<User>();
+            }
+            else { return null; }
+        });
     }
+
 }
