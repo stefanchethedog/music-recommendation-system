@@ -4,7 +4,8 @@ using Neo4j.Driver.Preview.Mapping;
 
 namespace repositories;
 
-public interface IAlbumRepository {
+public interface IAlbumRepository
+{
     Task<IEnumerable<Album>> FindAll();
     Task<Album?> FindOne(string id);
     Task<Album> Create(CreateAlbum user);
@@ -15,39 +16,40 @@ public interface IAlbumRepository {
 public class AlbumRepository : IAlbumRepository
 {
     private readonly IDriver _driver;
-    public AlbumRepository(IDriver driver) {
+    public AlbumRepository(IDriver driver)
+    {
         _driver = driver;
     }
     public async Task<Album> Create(CreateAlbum album)
     {
         var session = _driver.AsyncSession();
-        return await session.ExecuteWriteAsync(async trans => {
+        return await session.ExecuteWriteAsync(async trans =>
+        {
             var id = Guid.NewGuid().ToString();
             var cursor = await trans.RunAsync(@"
                 MATCH (artist:Artist {name: $artistName})
-                MERGE (artist)-[:CREATED]->(album:Album {id: $id, name: $name})
-                WITH album, $songs as songList
-                UNWIND songList as songNames
-                WITH *
-                MATCH (album:Album {name: $name})
-                MATCH (songs: Song {title: songNames})
-                MERGE (album)<-[:IN_ALBUM]-(songs)
-                WITH $genres AS genreList
-                UNWIND genreList as genreNames 
-                WITH *
-                MATCH (album:Album {name: $name})
-                MATCH (genres: Genre{name: genreNames})
-                WITH *
-                MERGE (album)-[:IN_GENRE]->(genres)
-                RETURN DISTINCT album;
-                ", 
-                new { 
-                id, 
-                name = album.Name, 
-                genres = album.Genres, 
-                artistName = album.AuthorName,
-                songs = album.Songs
-            });
+                CREATE (artist)-[:CREATED]->(album:Album {id: $id, name: $name})
+
+                FOREACH (genreName in $genres |
+                    MERGE (genre:Genre {name: genreName})
+                    MERGE (genre)<-[:IN_GENRE]-(album)
+                )
+
+                FOREACH (songName in $songs |
+                    MERGE (song:Song {name: songName})
+                    MERGE (song)-[:IN_ALBUM]->(album)
+                )
+
+                RETURN album;
+                ",
+                new
+                {
+                    id,
+                    name = album.Name,
+                    genres = album.Genres,
+                    artistName = album.AuthorName,
+                    songs = album.Songs
+                });
             return await cursor.SingleAsync(rec => rec.AsObject<Album>());
         });
     }
@@ -55,13 +57,15 @@ public class AlbumRepository : IAlbumRepository
     public async Task<Album?> Delete(string id)
     {
         var session = _driver.AsyncSession();
-        return await session.ExecuteWriteAsync(async trans => {
+        return await session.ExecuteWriteAsync(async trans =>
+        {
             var cursor = await trans.RunAsync(@"
                 MATCH (a:Album {id: $id}) 
                 WITH a, a.id AS id, a.name AS name 
                 DETACH DELETE a RETURN id, name;
             ", new { id });
-            if(await cursor.FetchAsync()) {
+            if (await cursor.FetchAsync())
+            {
                 return cursor.Current.AsObject<Album>();
             }
             return null;
@@ -71,7 +75,8 @@ public class AlbumRepository : IAlbumRepository
     public async Task<IEnumerable<Album>> FindAll()
     {
         var session = _driver.AsyncSession();
-        return await session.ExecuteReadAsync(async (trans) => {
+        return await session.ExecuteReadAsync(async (trans) =>
+        {
             var cursor = await trans.RunAsync(@"
                 MATCH (album:Album)<-[:CREATED]-(artist:Artist)
                 WITH {
@@ -81,7 +86,8 @@ public class AlbumRepository : IAlbumRepository
                 } as a
                 RETURN a
             ");
-            return await cursor.ToListAsync(rec => {
+            return await cursor.ToListAsync(rec =>
+            {
                 return rec.AsObject<AlbumView>();
             });
         });
@@ -90,12 +96,14 @@ public class AlbumRepository : IAlbumRepository
     public async Task<Album?> FindOne(string id)
     {
         var session = _driver.AsyncSession();
-        return await session.ExecuteReadAsync(async (trans) => {
+        return await session.ExecuteReadAsync(async (trans) =>
+        {
             var cursor = await trans.RunAsync(@"
                 MATCH (a:Album) WHERE a.id = $id 
                 RETURN a {.id, .name}
             ", new { id });
-            if(await cursor.FetchAsync()){
+            if (await cursor.FetchAsync())
+            {
                 return cursor.Current.AsObject<Album>();
             }
             else { return null; }
@@ -105,13 +113,15 @@ public class AlbumRepository : IAlbumRepository
     public async Task<Album?> Update(string id, string name)
     {
         var session = _driver.AsyncSession();
-        return await session.ExecuteWriteAsync(async (trans) => {
+        return await session.ExecuteWriteAsync(async (trans) =>
+        {
             var cursor = await trans.RunAsync(@"
                 OPTIONAL MATCH (a:Album {id: $id}) 
                 WITH a WHERE a IS NOT NULL 
                 SET a.name = $name RETURN a {.id, .name}
-            ", new { id, name});
-            if(await cursor.FetchAsync()){
+            ", new { id, name });
+            if (await cursor.FetchAsync())
+            {
                 return cursor.Current.AsObject<Album>();
             }
             else { return null; }
