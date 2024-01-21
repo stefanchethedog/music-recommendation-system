@@ -9,8 +9,14 @@ public class Album {
     }
 }
 
+public class AlbumView : Album {
+    public string ArtistName { get; set; }
+    public AlbumView(string id, string name, string artistName): base(id, name) {
+        ArtistName = artistName;
+    }
+}
 public class CreateAlbum {
-    public string Name { get; set; }
-    public string? AuthorName {get; set; }
-    public string[]? Genres { get; set; }
+    public required string Name { get; set; }
+    public required string AuthorName {get; set; }
+    public required IEnumerable<string> Genres { get; set; }
 }

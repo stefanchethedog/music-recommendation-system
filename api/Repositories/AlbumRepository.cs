@@ -7,7 +7,7 @@ namespace repositories;
 public interface IAlbumRepository {
     Task<IEnumerable<Album>> FindAll();
     Task<Album?> FindOne(string id);
-    Task<Album> Create(Album user);
+    Task<Album> Create(CreateAlbum user);
     Task<Album?> Delete(string id);
     Task<Album?> Update(string id, string name);
 }
@@ -18,15 +18,27 @@ public class AlbumRepository : IAlbumRepository
     public AlbumRepository(IDriver driver) {
         _driver = driver;
     }
-    public async Task<Album> Create(Album user)
+    public async Task<Album> Create(CreateAlbum album)
     {
         var session = _driver.AsyncSession();
         return await session.ExecuteWriteAsync(async trans => {
+            var id = Guid.NewGuid().ToString();
             var cursor = await trans.RunAsync(@"
-                CREATE (a:Album {id: $id, name: $name}) 
-                RETURN a {.id, .name};
-            ", new { id = user.Id, name = user.Name});
-            return await cursor.SingleAsync(rec => rec.AsObject<Album>());
+                CREATE (album:Album {id: $id, name: $name}) 
+                MERGE (album)<-[:CREATED]-(artist: Artist {name: $artistName})
+                WITH {
+                    id: album.id,
+                    name: album.name,
+                    artistName: artist.name
+                } as a
+                RETURN a;
+            ", new { 
+                id, 
+                name = album.Name, 
+                genres = album.Genres, 
+                artistName = album.AuthorName
+            });
+            return await cursor.SingleAsync(rec => rec.AsObject<AlbumView>());
         });
     }
 
@@ -52,7 +64,16 @@ public class AlbumRepository : IAlbumRepository
         return await session.ExecuteReadAsync(async (trans) => {
             var cursor = await trans.RunAsync(@"
                 MATCH (a:Album) 
-                RETURN a { .id, .name };
+                WITH a as album
+                OPTIONAL MATCH (artist:Artist)-[:CREATED]->(a)
+                WITH artist
+                WHERE artist IS NOT NULL
+                WITH {
+                    id: album.id,
+                    name: album.name,
+                    artistName: artist.name
+                } as response
+                RETURN response;
             ");
             return await cursor.ToListAsync(rec => {
                 return rec.AsObject<Album>();

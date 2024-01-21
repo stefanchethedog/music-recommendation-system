@@ -33,8 +33,7 @@ public class AlbumsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Album>> Create([FromBody]CreateAlbum albumInfo) {
         string id = Guid.NewGuid().ToString();
-        var album = new Album(id, albumInfo.Name);
-        var result = await _repo.Create(album);
+        var result = await _repo.Create(albumInfo);
         if(result != null) { return Ok(result);}
         return new StatusCodeResult(StatusCodes.Status500InternalServerError);
     }
