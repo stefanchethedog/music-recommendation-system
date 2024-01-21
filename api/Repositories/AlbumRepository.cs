@@ -24,21 +24,22 @@ public class AlbumRepository : IAlbumRepository
         return await session.ExecuteWriteAsync(async trans => {
             var id = Guid.NewGuid().ToString();
             var cursor = await trans.RunAsync(@"
-                CREATE (album:Album {id: $id, name: $name}) 
-                MERGE (album)<-[:CREATED]-(artist: Artist {name: $artistName})
-                WITH {
-                    id: album.id,
-                    name: album.name,
-                    artistName: artist.name
-                } as a
-                RETURN a;
+                MATCH (artist:Artist {name: $artistName})
+                CREATE (album:Album {id: $id, name: $name})
+                CREATE (artist)-[:CREATED]->(album)
+                WITH album, $genres AS genreList
+                UNWIND genreList as genreNames
+                MATCH (genres:Genre {name: genreNames})
+                WITH album, collect(genres) as genreList
+                FOREACH (genre IN genreList | CREATE (album)-[:IN_GENRE]->(genre))
+                RETURN album {.id, .name};
             ", new { 
                 id, 
                 name = album.Name, 
                 genres = album.Genres, 
                 artistName = album.AuthorName
             });
-            return await cursor.SingleAsync(rec => rec.AsObject<AlbumView>());
+            return await cursor.SingleAsync(rec => rec.AsObject<Album>());
         });
     }
 
@@ -63,20 +64,16 @@ public class AlbumRepository : IAlbumRepository
         var session = _driver.AsyncSession();
         return await session.ExecuteReadAsync(async (trans) => {
             var cursor = await trans.RunAsync(@"
-                MATCH (a:Album) 
-                WITH a as album
-                OPTIONAL MATCH (artist:Artist)-[:CREATED]->(a)
-                WITH artist
-                WHERE artist IS NOT NULL
+                MATCH (album:Album)<-[:CREATED]-(artist:Artist)
                 WITH {
                     id: album.id,
                     name: album.name,
                     artistName: artist.name
-                } as response
-                RETURN response;
+                } as a
+                RETURN a
             ");
             return await cursor.ToListAsync(rec => {
-                return rec.AsObject<Album>();
+                return rec.AsObject<AlbumView>();
             });
         });
     }
