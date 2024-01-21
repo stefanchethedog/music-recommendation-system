@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using models;
+using views;
 using repositories;
 
 using UpdateAlbum = models.CreateAlbum;
@@ -18,7 +19,7 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpGet]
-    public Task<IEnumerable<Album>> Get()
+    public Task<IEnumerable<AlbumView>> Get()
     {
         return _repo.FindAll();
     }

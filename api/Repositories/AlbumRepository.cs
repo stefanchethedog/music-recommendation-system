@@ -1,4 +1,5 @@
 using models;
+using views;
 using Neo4j.Driver;
 using Neo4j.Driver.Preview.Mapping;
 
@@ -6,7 +7,7 @@ namespace repositories;
 
 public interface IAlbumRepository
 {
-    Task<IEnumerable<Album>> FindAll();
+    Task<IEnumerable<AlbumView>> FindAll();
     Task<Album?> FindOne(string id);
     Task<Album> Create(CreateAlbum user);
     Task<Album?> Delete(string id);
@@ -72,7 +73,7 @@ public class AlbumRepository : IAlbumRepository
         });
     }
 
-    public async Task<IEnumerable<Album>> FindAll()
+    public async Task<IEnumerable<AlbumView>> FindAll()
     {
         var session = _driver.AsyncSession();
         return await session.ExecuteReadAsync(async (trans) =>
