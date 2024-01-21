@@ -117,4 +117,3 @@ CREATE
 (:Album{id: "c7d5f4c9-2b5c-4a71-bd62-4421df458154", name: "The Wall"}),
 (:Album{id: "bd0709d3-394d-477d-a267-d8c5cc8b3af5", name: "Beggars Banquet"}),
 (:Album{id: "7c0888f5-94f8-40e4-8426-14aef9b35246", name: "The College Dropout"}),
-(:Album{id: "6de38a76-89db-46a7-a265-93f9c79ba050", name: "Let It Be"})

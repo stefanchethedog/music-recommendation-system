@@ -19,4 +19,5 @@ public class CreateAlbum {
     public required string Name { get; set; }
     public required string AuthorName {get; set; }
     public required IEnumerable<string> Genres { get; set; }
+    public IEnumerable<string>? Songs { get; set; }
 }

@@ -25,19 +25,28 @@ public class AlbumRepository : IAlbumRepository
             var id = Guid.NewGuid().ToString();
             var cursor = await trans.RunAsync(@"
                 MATCH (artist:Artist {name: $artistName})
-                CREATE (album:Album {id: $id, name: $name})
-                CREATE (artist)-[:CREATED]->(album)
-                WITH album, $genres AS genreList
-                UNWIND genreList as genreNames
-                MATCH (genres:Genre {name: genreNames})
-                WITH album, collect(genres) as genreList
-                FOREACH (genre IN genreList | CREATE (album)-[:IN_GENRE]->(genre))
-                RETURN album {.id, .name};
-            ", new { 
+                MERGE (artist)-[:CREATED]->(album:Album {id: $id, name: $name})
+                WITH album, $songs as songList
+                UNWIND songList as songNames
+                WITH *
+                MATCH (album:Album {name: $name})
+                MATCH (songs: Song {title: songNames})
+                MERGE (album)<-[:IN_ALBUM]-(songs)
+                WITH $genres AS genreList
+                UNWIND genreList as genreNames 
+                WITH *
+                MATCH (album:Album {name: $name})
+                MATCH (genres: Genre{name: genreNames})
+                WITH *
+                MERGE (album)-[:IN_GENRE]->(genres)
+                RETURN DISTINCT album;
+                ", 
+                new { 
                 id, 
                 name = album.Name, 
                 genres = album.Genres, 
-                artistName = album.AuthorName
+                artistName = album.AuthorName,
+                songs = album.Songs
             });
             return await cursor.SingleAsync(rec => rec.AsObject<Album>());
         });
