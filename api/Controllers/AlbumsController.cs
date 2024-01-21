@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using models;
+using views;
 using repositories;
 
 using UpdateAlbum = models.CreateAlbum;
@@ -18,7 +19,7 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpGet]
-    public Task<IEnumerable<Album>> Get()
+    public Task<IEnumerable<AlbumView>> Get()
     {
         return _repo.FindAll();
     }
@@ -33,8 +34,7 @@ public class AlbumsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Album>> Create([FromBody]CreateAlbum albumInfo) {
         string id = Guid.NewGuid().ToString();
-        var album = new Album(id, albumInfo.Name);
-        var result = await _repo.Create(album);
+        var result = await _repo.Create(albumInfo);
         if(result != null) { return Ok(result);}
         return new StatusCodeResult(StatusCodes.Status500InternalServerError);
     }

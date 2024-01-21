@@ -8,9 +8,9 @@ public class Album {
         Name = name;
     }
 }
-
 public class CreateAlbum {
-    public string Name { get; set; }
-    public string? AuthorName {get; set; }
-    public string[]? Genres { get; set; }
+    public required string Name { get; set; }
+    public required string AuthorName {get; set; }
+    public required IEnumerable<string> Genres { get; set; }
+    public required IEnumerable<string> Songs { get; set; }
 }
