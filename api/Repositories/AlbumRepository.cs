@@ -11,7 +11,7 @@ public interface IAlbumRepository
     Task<Album?> FindOne(string id);
     Task<Album> Create(CreateAlbum user);
     Task<Album?> Delete(string id);
-    Task<Album?> Update(string id, string name);
+    Task<Album?> Update(string id, UpdateAlbum albumInfo);
 }
 
 public class AlbumRepository : IAlbumRepository
@@ -111,16 +111,34 @@ public class AlbumRepository : IAlbumRepository
         });
     }
 
-    public async Task<Album?> Update(string id, string name)
+    public async Task<Album?> Update(string id, UpdateAlbum albumInfo)
     {
         var session = _driver.AsyncSession();
         return await session.ExecuteWriteAsync(async (trans) =>
         {
             var cursor = await trans.RunAsync(@"
                 OPTIONAL MATCH (a:Album {id: $id}) 
-                WITH a WHERE a IS NOT NULL 
-                SET a.name = $name RETURN a {.id, .name}
-            ", new { id, name });
+                MATCH (s:Song)-[in_album:IN_ALBUM]->(a)
+                MATCH (g:Genre)-[in_genre:IN_GENRE]-(a)
+                MATCH (artist:Artist)-[created:CREATED]->(a)
+
+                WITH *, collect(DISTINCT s.name) as songNames, collect(DISTINCT g.name) as genreNames, a WHERE a IS NOT NULL
+                DETACH DELETE in_album
+                DETACH DELETE in_genre
+                DETACH DELETE created
+                MERGE (newArtist: Artist {name: COALESCE($artistName, artist.name)})
+                MERGE (newArtist)-[:CREATED]->(a)
+                FOREACH( genreName in COALESCE($genres, genreNames) |
+                    MERGE (genre:Genre{name: genreName})
+                    MERGE (a)-[:IN_GENRE]-(genre)
+                )
+                FOREACH( songName in COALESCE($songs, songNames) |
+                    MERGE (song:Song{ name: songName})
+                    MERGE (a)<-[:IN_ALBUM]-(song)
+                )
+                SET a.name = COALESCE($name, a.name) RETURN DISTINCT a; 
+
+            ", new { id, name = albumInfo.Name, artistName = albumInfo.AuthorName, songs = albumInfo.Songs, genres = albumInfo.Genres});
             if (await cursor.FetchAsync())
             {
                 return cursor.Current.AsObject<Album>();
