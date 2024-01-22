@@ -80,12 +80,9 @@ public class AlbumRepository : IAlbumRepository
         {
             var cursor = await trans.RunAsync(@"
                 MATCH (album:Album)<-[:CREATED]-(artist:Artist)
-                WITH {
-                    id: album.id,
-                    name: album.name,
-                    artistName: artist.name
-                } as a
-                RETURN a
+                OPTIONAL MATCH (songs:Song)-[:IN_ALBUM]->(album)
+                WITH album.id AS id, album.name AS name, artist.name AS artistName, COLLECT(songs.name) AS songNames
+                RETURN {id: id, songs: songNames, name: name, artistName: artistName} AS a;
             ");
             return await cursor.ToListAsync(rec =>
             {
