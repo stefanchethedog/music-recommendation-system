@@ -23,35 +23,42 @@ public class ArtistsController : ControllerBase
         return _repo.FindAll();
     }
     [HttpGet(":id")]
-    public async Task<ActionResult<Artist?>> GetOne(string id) {
+    public async Task<ActionResult<Artist?>> GetOne(string id)
+    {
         var artist = await _repo.FindOne(id);
-        if(artist == null) {
+        if (artist == null)
+        {
             return NotFound("Artist with given id was not found");
         }
         return Ok(artist);
     }
     [HttpPost]
-    public async Task<ActionResult<Artist>> Create([FromBody]CreateArtist artistInfo) {
+    public async Task<ActionResult<Artist>> Create([FromBody] CreateArtist artistInfo)
+    {
         string id = Guid.NewGuid().ToString();
         var artist = new Artist(id, artistInfo.Name);
         var result = await _repo.Create(artist);
-        if(result != null) { return Ok(result);}
+        if (result != null) { return Ok(result); }
         return new StatusCodeResult(StatusCodes.Status500InternalServerError);
     }
     [HttpDelete(":id")]
-    public async Task<ActionResult<Artist?>> Delete(string id) {
+    public async Task<ActionResult<Artist?>> Delete(string id)
+    {
         var result = await _repo.Delete(id);
-        if(result != null) { return Ok(result);}
-        return NotFound(new {
+        if (result != null) { return Ok(result); }
+        return NotFound(new
+        {
             error = "Artist with given id was not found"
         });
     }
 
     [HttpPatch(":id")]
-    public async Task<ActionResult<Artist?>> Update(string id, [FromBody]UpdateArtist artistInfo) {
+    public async Task<ActionResult<Artist?>> Update(string id, [FromBody] UpdateArtist artistInfo)
+    {
         var result = await _repo.Update(id, artistInfo.Name);
-        if(result != null) { return Ok(result);}
-        return NotFound(new {
+        if (result != null) { return Ok(result); }
+        return NotFound(new
+        {
             error = "Artist with given id was not found"
         });
     }

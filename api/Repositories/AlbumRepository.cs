@@ -138,7 +138,7 @@ public class AlbumRepository : IAlbumRepository
                 )
                 SET a.name = COALESCE($name, a.name) RETURN DISTINCT a; 
 
-            ", new { id, name = albumInfo.Name, artistName = albumInfo.AuthorName, songs = albumInfo.Songs, genres = albumInfo.Genres});
+            ", new { id, name = albumInfo.Name, artistName = albumInfo.AuthorName, songs = albumInfo.Songs, genres = albumInfo.Genres });
             if (await cursor.FetchAsync())
             {
                 return cursor.Current.AsObject<Album>();
