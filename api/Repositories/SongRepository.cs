@@ -57,7 +57,7 @@ public class SongRepository : ISongRepository
 
             WITH song, artist, album
             WHERE album IS NOT NULL
-                MERGE (album)<-[:SONG_BELONGS_TO_ALBUM]-(song)
+                MERGE (album)<-[:IN_ALBUM]-(song)
             WITH song, artist, album
 
             UNWIND $genresList AS genName
@@ -103,7 +103,7 @@ public class SongRepository : ISongRepository
                 MATCH (song: Song { id: $id })
                 MATCH (artist: Artist)-[:PERFORMS]->(song)
                 MATCH (genre: Genre)<-[:IN_GENRE]-(song)
-                OPTIONAL MATCH (album: Album)<-[:SONG_BELONGS_TO_ALBUM]-(song)
+                OPTIONAL MATCH (album: Album)<-[:IN_ALBUM]-(song)
 
                 WITH song, song.id AS id, song.name AS name, artist, genre, album
                 DETACH DELETE song
@@ -141,7 +141,7 @@ public class SongRepository : ISongRepository
                 MATCH (song:Song)
                 MATCH (author:Artist)-[:PERFORMS]->(song)
                 MATCH (genre:Genre)<-[:IN_GENRE]-(song)
-                OPTIONAL MATCH (album:Album)<-[:SONG_BELONGS_TO_ALBUM]-(song)
+                OPTIONAL MATCH (album:Album)<-[:IN_ALBUM]-(song)
 
                 RETURN
                     song.id AS id,
@@ -171,7 +171,7 @@ public class SongRepository : ISongRepository
                 MATCH (song: Song { id: $id })
                 MATCH (artist: Artist)-[:PERFORMS]->(song)
                 MATCH (genre: Genre)<-[:IN_GENRE]-(song)
-                OPTIONAL MATCH (album: Album)<-[:SONG_BELONGS_TO_ALBUM]-(song)
+                OPTIONAL MATCH (album: Album)<-[:IN_ALBUM]-(song)
 
                 RETURN
                     song.id AS id,
@@ -217,7 +217,7 @@ public class SongRepository : ISongRepository
                 DELETE relationship_artist
 
                 WITH song
-                OPTIONAL MATCH (song)<-[relationship_album:SONG_BELONGS_TO_ALBUM]-(album: Album)
+                OPTIONAL MATCH (song)<-[relationship_album:IN_ALBUM]-(album: Album)
                 DELETE relationship_album
 
                 WITH song
@@ -229,7 +229,7 @@ public class SongRepository : ISongRepository
                 MERGE (song)<-[:PERFORMS]-(newArtist)
 
                 MERGE (newAlbum: Album { name: $newAlbum })
-                MERGE (song)-[:SONG_BELONGS_TO_ALBUM]->(newAlbum)
+                MERGE (song)-[:IN_ALBUM]->(newAlbum)
 
                 WITH song, newAlbum, newArtist
 
@@ -316,7 +316,7 @@ public class SongRepository : ISongRepository
                 MATCH (song:Song { id: $id })
                 MATCH (song)-[:IN_GENRE]->(genre: Genre)
                 MATCH (song)<-[:PERFORMS]-(artist: Artist)
-                OPTIONAL MATCH (song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                OPTIONAL MATCH (song)-[:IN_ALBUM]->(album:Album)
 
                 RETURN
                     song.id AS id,
@@ -351,14 +351,14 @@ public class SongRepository : ISongRepository
                     MATCH (song: Song { id: $id })
                     WITH song
 
-                    OPTIONAL MATCH (song)-[relationship_album:SONG_BELONGS_TO_ALBUM]->(album: Album)
+                    OPTIONAL MATCH (song)-[relationship_album:IN_ALBUM]->(album: Album)
                     DELETE relationship_album
 
                     WITH song
 
                     FOREACH(ignore IN CASE WHEN $newAlbum IS NOT NULL THEN [1] ELSE [] END |
                         MERGE (album: Album { name: $newAlbum })
-                        MERGE (song)-[:SONG_BELONGS_TO_ALBUM]->(album)
+                        MERGE (song)-[:IN_ALBUM]->(album)
                     )
 
                     WITH song
@@ -392,7 +392,7 @@ public class SongRepository : ISongRepository
                     MATCH (song:Song { id: $id })
                     MATCH (song)-[:IN_GENRE]->(genre: Genre)
                     MATCH (song)<-[:PERFORMS]-(artist: Artist)
-                    OPTIONAL MATCH (song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                    OPTIONAL MATCH (song)-[:IN_ALBUM]->(album:Album)
 
                     RETURN
                         song.id AS id,
@@ -432,7 +432,7 @@ public class SongRepository : ISongRepository
 
                 MATCH(song)-[:IN_GENRE]->(genre: Genre)
                 MATCH(song)<-[:PERFORMS]-(artist: Artist)
-                OPTIONAL MATCH(song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                OPTIONAL MATCH(song)-[:IN_ALBUM]->(album:Album)
 
                 RETURN
                     song.id AS id,
@@ -466,7 +466,7 @@ public class SongRepository : ISongRepository
                 MATCH (song:Song { id: $id })
                 MATCH (song)-[:IN_GENRE]->(genre: Genre)
                 MATCH (song)<-[:PERFORMS]-(artist: Artist)
-                OPTIONAL MATCH (song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                OPTIONAL MATCH (song)-[:IN_ALBUM]->(album:Album)
 
                 RETURN
                     song.id AS id,
@@ -538,7 +538,7 @@ public class SongRepository : ISongRepository
                 MATCH (song:Song { id: $id })
                 MATCH (song)-[:IN_GENRE]->(genre: Genre)
                 MATCH (song)<-[:PERFORMS]-(artist: Artist)
-                OPTIONAL MATCH (song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                OPTIONAL MATCH (song)-[:IN_ALBUM]->(album:Album)
 
                 RETURN
                     song.id AS id,
@@ -602,7 +602,7 @@ public class SongRepository : ISongRepository
                 MATCH (song:Song { id: $id })
                 MATCH (song)-[:IN_GENRE]->(genre: Genre)
                 MATCH (song)<-[:PERFORMS]-(artist: Artist)
-                OPTIONAL MATCH (song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                OPTIONAL MATCH (song)-[:IN_ALBUM]->(album:Album)
 
                 RETURN
                     song.id AS id,
@@ -665,7 +665,7 @@ public class SongRepository : ISongRepository
                 MATCH (song:Song { id: $id })
                 MATCH (song)-[:IN_GENRE]->(genre: Genre)
                 MATCH (song)<-[:PERFORMS]-(artist: Artist)
-                OPTIONAL MATCH (song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                OPTIONAL MATCH (song)-[:IN_ALBUM]->(album:Album)
 
                 RETURN
                     song.id AS id,

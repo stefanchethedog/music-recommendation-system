@@ -3,8 +3,6 @@ using models;
 using views;
 using repositories;
 
-using UpdateAlbum = models.CreateAlbum;
-
 namespace MusicRecommendationEngineAPI.Controllers;
 
 [ApiController]
@@ -24,34 +22,41 @@ public class AlbumsController : ControllerBase
         return _repo.FindAll();
     }
     [HttpGet(":id")]
-    public async Task<ActionResult<Album?>> GetOne(string id) {
+    public async Task<ActionResult<Album?>> GetOne(string id)
+    {
         var album = await _repo.FindOne(id);
-        if(album == null) {
+        if (album == null)
+        {
             return NotFound("Album with given id was not found");
         }
         return Ok(album);
     }
     [HttpPost]
-    public async Task<ActionResult<Album>> Create([FromBody]CreateAlbum albumInfo) {
+    public async Task<ActionResult<Album>> Create([FromBody] CreateAlbum albumInfo)
+    {
         string id = Guid.NewGuid().ToString();
         var result = await _repo.Create(albumInfo);
-        if(result != null) { return Ok(result);}
+        if (result != null) { return Ok(result); }
         return new StatusCodeResult(StatusCodes.Status500InternalServerError);
     }
     [HttpDelete(":id")]
-    public async Task<ActionResult<Album?>> Delete(string id) {
+    public async Task<ActionResult<Album?>> Delete(string id)
+    {
         var result = await _repo.Delete(id);
-        if(result != null) { return Ok(result);}
-        return NotFound(new {
+        if (result != null) { return Ok(result); }
+        return NotFound(new
+        {
             error = "Album with given id was not found"
         });
     }
 
     [HttpPatch(":id")]
-    public async Task<ActionResult<Album?>> Update(string id, [FromBody]UpdateAlbum albumInfo) {
-        var result = await _repo.Update(id, albumInfo.Name);
-        if(result != null) { return Ok(result);}
-        return NotFound(new {
+    public async Task<ActionResult<Album?>> Update([FromQuery] string id, [FromBody] UpdateAlbum albumInfo)
+    {
+        var result = await _repo.Update(id, albumInfo);
+        if (result != null) { return Ok(result); }
+        return NotFound(new
+        {
             error = "Album with given id was not found"
         });
     }

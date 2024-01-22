@@ -24,20 +24,22 @@ public class SongsController : ControllerBase
     }
     [HttpGet]
     [Route("GetOne")]
-    public Task<SongView?> FindOne([FromQuery]String id)
+    public Task<SongView?> FindOne([FromQuery] String id)
     {
         return _repo.FindOne(id);
     }
 
     [HttpPost]
     [Route("Create")]
-    public Task<SongView?> Create([FromBody] CreateSong song){
+    public Task<SongView?> Create([FromBody] CreateSong song)
+    {
         return _repo.Create(song);
     }
 
     [HttpDelete]
     [Route("DeleteSong")]
-    public Task<SongView?> Delete([FromQuery] String id){
+    public Task<SongView?> Delete([FromQuery] String id)
+    {
         return _repo.Delete(id);
     }
 
@@ -45,9 +47,9 @@ public class SongsController : ControllerBase
     [Route("RemoveGenre")]
     public Task<SongView?> RemoveGenre([FromQuery] string id, [FromQuery] string genre)
     {
-        return _repo.RemoveGenre( id, genre);
+        return _repo.RemoveGenre(id, genre);
     }
-    
+
     [HttpPatch]
     [Route("Update")]
     public Task<SongView?> Update([FromQuery] String id, [FromBody] SongView song)
@@ -60,21 +62,21 @@ public class SongsController : ControllerBase
     [Route("UpdateArtist")]
     public Task<SongView?> UpdateArtist([FromQuery] string id, [FromQuery] string newArtist)
     {
-        return _repo.UpdateArtist(id,newArtist);
-    } 
+        return _repo.UpdateArtist(id, newArtist);
+    }
     [HttpPatch]
     [Route("UpdateAlbum")]
     public Task<SongView?> UpdateAlbum([FromQuery] string id, [FromQuery] string? newAlbum)
     {
-        return _repo.UpdateAlbum(id,newAlbum);
-    } 
+        return _repo.UpdateAlbum(id, newAlbum);
+    }
 
     [HttpPatch]
     [Route("UpdateName")]
     public Task<SongView?> UpdateName([FromQuery] string id, [FromQuery] string newName)
     {
-        return _repo.UpdateName(id,newName);
-    } 
+        return _repo.UpdateName(id, newName);
+    }
 
     [HttpPatch]
     [Route("UpdateGenres")]
@@ -87,8 +89,8 @@ public class SongsController : ControllerBase
     [Route("AddGenre")]
     public Task<SongView?> AddGenre([FromQuery] string id, [FromQuery] string genre)
     {
-        return _repo.AddGenre( id, genre );
+        return _repo.AddGenre(id, genre);
     }
 
-    
+
 }
