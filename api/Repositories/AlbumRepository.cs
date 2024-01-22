@@ -80,7 +80,7 @@ public class AlbumRepository : IAlbumRepository
         {
             var cursor = await trans.RunAsync(@"
                 MATCH (album:Album)<-[:CREATED]-(artist:Artist)
-                OPTIONAL MATCH (songs:Song)-[:IN_ALBUM]->(album)
+                MATCH (songs:Song)-[:IN_ALBUM]->(album)
                 WITH album.id AS id, album.name AS name, artist.name AS artistName, COLLECT(songs.name) AS songNames
                 RETURN {id: id, songs: songNames, name: name, artistName: artistName} AS a;
             ");
@@ -97,12 +97,15 @@ public class AlbumRepository : IAlbumRepository
         return await session.ExecuteReadAsync(async (trans) =>
         {
             var cursor = await trans.RunAsync(@"
-                MATCH (a:Album) WHERE a.id = $id 
-                RETURN a {.id, .name}
+                MATCH (album:Album) WHERE album.id = $id 
+                MATCH (songs:Song)-[:IN_ALBUM]->(album)
+                MATCH (artist:Artist)-[:CREATED]->(album)
+                WITH album.id AS id, album.name AS name, artist.name AS artistName, COLLECT(songs.name) AS songNames
+                RETURN {id: id, songs: songNames, name: name, artistName: artistName} AS a;
             ", new { id });
             if (await cursor.FetchAsync())
             {
-                return cursor.Current.AsObject<Album>();
+                return cursor.Current.AsObject<AlbumView>();
             }
             else { return null; }
         });
