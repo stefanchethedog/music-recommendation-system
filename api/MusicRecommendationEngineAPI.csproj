@@ -10,6 +10,9 @@
   <ItemGroup>
     <PackageReference Include="Neo4j.Driver" Version="5.16.0" />
     <PackageReference Include="Neo4j.Driver.Extensions" Version="1.0.14" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NRedisStack" Version="0.11.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.7.17" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
