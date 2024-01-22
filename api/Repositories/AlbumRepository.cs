@@ -81,8 +81,9 @@ public class AlbumRepository : IAlbumRepository
             var cursor = await trans.RunAsync(@"
                 MATCH (album:Album)<-[:CREATED]-(artist:Artist)
                 MATCH (songs:Song)-[:IN_ALBUM]->(album)
-                WITH album.id AS id, album.name AS name, artist.name AS artistName, COLLECT(songs.name) AS songNames
-                RETURN {id: id, songs: songNames, name: name, artistName: artistName} AS a;
+                MATCH (genres:Genre)-[:IN_GENRE]-(album)
+                WITH album.id AS id, album.name AS name, artist.name AS artistName, COLLECT(DISTINCT songs.name) AS songNames, COLLECT(DISTINCT genres.name) as genreNames
+                RETURN {id: id, songs: songNames, name: name, artistName: artistName, genres: genreNames} AS a;
             ");
             return await cursor.ToListAsync(rec =>
             {
@@ -99,9 +100,9 @@ public class AlbumRepository : IAlbumRepository
             var cursor = await trans.RunAsync(@"
                 MATCH (album:Album) WHERE album.id = $id 
                 MATCH (songs:Song)-[:IN_ALBUM]->(album)
-                MATCH (artist:Artist)-[:CREATED]->(album)
-                WITH album.id AS id, album.name AS name, artist.name AS artistName, COLLECT(songs.name) AS songNames
-                RETURN {id: id, songs: songNames, name: name, artistName: artistName} AS a;
+                MATCH (artist:Artist)-[:CREATED]->(album)-[:IN_GENRE]-(genres:Genre)
+                WITH album.id AS id, album.name AS name, artist.name AS artistName, COLLECT(DISTINCT songs.name) AS songNames, COLLECT (DISTINCT genres.name) as genreNames
+                RETURN {id: id, songs: songNames, name: name, artistName: artistName, genres: genreNames} AS a;
             ", new { id });
             if (await cursor.FetchAsync())
             {
