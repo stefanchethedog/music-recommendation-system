@@ -14,3 +14,10 @@ public class CreateAlbum {
     public required IEnumerable<string> Genres { get; set; }
     public required IEnumerable<string> Songs { get; set; }
 }
+
+public class UpdateAlbum {
+    public string? Name { get; set; }
+    public string? AuthorName { get; set; }
+    public IEnumerable<string>? Genres { get; set; }
+    public IEnumerable<string>? Songs { get; set; }
+}

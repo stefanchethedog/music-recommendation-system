@@ -3,8 +3,6 @@ using models;
 using views;
 using repositories;
 
-using UpdateAlbum = models.CreateAlbum;
-
 namespace MusicRecommendationEngineAPI.Controllers;
 
 [ApiController]
@@ -48,8 +46,8 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpPatch(":id")]
-    public async Task<ActionResult<Album?>> Update(string id, [FromBody]UpdateAlbum albumInfo) {
-        var result = await _repo.Update(id, albumInfo.Name);
+    public async Task<ActionResult<Album?>> Update([FromQuery]string id, [FromBody]UpdateAlbum albumInfo) {
+        var result = await _repo.Update(id, albumInfo);
         if(result != null) { return Ok(result);}
         return NotFound(new {
             error = "Album with given id was not found"
