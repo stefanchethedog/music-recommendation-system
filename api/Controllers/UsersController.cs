@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using models;
 using repositories;
+using views;
 using UpdateUser = models.CreateUser;
 
 namespace MusicRecommendationEngineAPI.Controllers;
@@ -53,5 +55,41 @@ public class UsersController : ControllerBase
         return NotFound(new {
             error = "User with given id was not found"
         });
+    }
+
+    [HttpPost]
+    [Route("AddUserLikesSong")]
+    public async Task<ActionResult<User?>> AddUserLikesSong([FromQuery] string id,[FromQuery] string songName)
+    {
+        var result = await _repo.AddLikesSong(id, songName);
+        if(result != null) { return Ok(result); }
+        return NotFound(new{
+            error = "Error"
+        });
+    }
+    [HttpPost]
+    [Route("Follow")]
+    public async Task<ActionResult<User?>> Follow([FromQuery] string id,[FromQuery] string username)
+    {
+        var result = await _repo.FollowUser(id, username);
+        if(result != null) { return Ok(result); }
+        return NotFound(new{
+            error = "Error"
+        });
+    }
+
+    [HttpGet]
+    [Route("RecommendSongsByLikedSongs")]
+    public async Task<ActionResult<List<SongView>?>> RecommendSongsByLikedSongs([FromQuery]string id)
+    {
+        var result = await _repo.FindOtherUsersSongs(id);
+
+        return result;
+    }
+    [HttpGet]
+    [Route("GetRecommendedSongsByFollowingUsers")]
+    public async Task<ActionResult<List<SongView>?>> GetRecommendedSongsByFollowingUsers([FromQuery] string id)
+    {
+        return await _repo.FindSongsByTheFollowedUsers(id);
     }
 }
