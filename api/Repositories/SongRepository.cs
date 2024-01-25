@@ -657,7 +657,7 @@ public class SongRepository : ISongRepository
         if (objectId == null)
             return null;
 
-        return await session.ExecuteWriteAsync(
+        return await session.ExecuteReadAsync(
             async (trans) =>
             {
                 var cursor = await trans.RunAsync(

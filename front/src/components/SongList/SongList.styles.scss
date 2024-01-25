@@ -1,0 +1,35 @@
+
+.song-list{
+    &__container{
+        display: flex;
+
+        width: 1340px;
+        background-color: #3282B8;
+        padding: 8px;
+        border: 2px solid gray;
+        border-radius: 10px;
+        margin: 52px 0;
+        margin-left: 510px;
+        position: relative;
+        
+
+        &__title{
+            position:absolute;
+            color: white;
+            background-color: transparent;
+            top: -64px;
+            left: 8px;
+            font-size: 28px;
+        }
+
+        &__songs{
+            display: flex;
+            &--no-wrap{
+                overflow-x: scroll
+            }
+            &--wrap{
+                flex-wrap: wrap;
+            }
+        }
+    }
+}
