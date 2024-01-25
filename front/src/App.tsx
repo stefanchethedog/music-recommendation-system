@@ -7,10 +7,12 @@ import "./App.css";
 
 function App() {
   const [username, setUsername] = useState<null | String>(null);
+  const [id, setId] = useState<null | String>(null);
+
 
   return (
     <div className="App">
-      {username ? <LandingPage /> : <UsernamePage setUsername={setUsername} />}
+      {username ? <LandingPage id={id}/> : <UsernamePage setUsername={setUsername} setId = {setId} />}
     </div>
   );
 }

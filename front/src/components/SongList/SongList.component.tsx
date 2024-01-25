@@ -8,7 +8,7 @@ type SongListProps = {
   className?: String;
   wrap?: Boolean;
   title: String;
-  songData: Omit<SongProps, "className">[];
+  songData: Omit<SongProps, "className">[] | undefined;
 };
 
 const SongList: FC<SongListProps> = ({
@@ -27,7 +27,7 @@ const SongList: FC<SongListProps> = ({
           wrap ? "--wrap" : "--no-wrap"
         }`}
       >
-        {songData.map((song, index) => {
+        {songData && songData.map((song, index) => {
           return (
             <Song className="song-list__container__songs__song" {...song} />
           );

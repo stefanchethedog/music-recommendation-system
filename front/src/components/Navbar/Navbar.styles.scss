@@ -6,6 +6,7 @@
         justify-content: flex-start;
 
         background-color: #0F4C75;
+        position: fixed;
 
         height: 100vh;
 
@@ -21,8 +22,21 @@
             margin-top: 10%;
             &__item{
                 color:white;
-                font-size: large;
+                font-size: 25px;
                 font-weight: bold;
+            }
+        }
+        &__input{
+            align-self: center;
+            display: flex;
+            justify-content: flex-start;
+            gap: 20px;
+            width: 350px;
+            margin-top:32px;
+
+            &__text-field--wrapper{
+                background-color: white;
+                border-radius: 4px;
             }
         }
     }

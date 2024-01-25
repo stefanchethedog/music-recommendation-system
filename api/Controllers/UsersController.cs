@@ -33,6 +33,32 @@ public class UsersController : ControllerBase
         }
         return Ok(user);
     }
+
+    [HttpGet]
+    [Route("getLikedSongs")]
+    public async Task<ActionResult<List<SongView>?>> getLikedSongs(string id)
+    {
+        var user = await _repo.GetLikedSongs(id);
+        if(user == null)
+        {
+            return NotFound("User with given id was not found");
+        }
+        return Ok(user);
+    }
+
+
+    [HttpGet]
+    [Route("getUserByUsername")]
+    public async Task<ActionResult<User?>> GetUserByUsername(string username)
+    {
+        var user = await _repo.FindUserByUsername(username);
+        if(user == null)
+        {
+            return NotFound("User not found");
+        }
+        return Ok(user);
+    }
+
     [HttpPost]
     public async Task<ActionResult<User>> Create([FromBody] CreateUser userInfo)
     {
@@ -85,6 +111,17 @@ public class UsersController : ControllerBase
         });
     }
 
+    [HttpPost]
+    [Route("subscribe")]
+    public async Task<ActionResult<User?>> Subscribe([FromQuery] string id,[FromQuery] string name)
+    {
+        var result = await _repo.Subscribe(id, name);
+        if(result != null) { return Ok(result); }
+        return NotFound(new{
+            error = "Error"
+        });
+    }
+    
     [HttpGet]
     [Route("RecommendSongsByLikedSongs")]
     public async Task<ActionResult<List<SongView>?>> RecommendSongsByLikedSongs([FromQuery]string id)
