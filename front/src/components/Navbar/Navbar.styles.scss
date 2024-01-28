@@ -1,43 +1,52 @@
 .navbar{
-    &__container{
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
+    position: fixed;
+    background-color: #3282B8;
+    height: 100vh;
+    display: flex;
 
+    &__title{
+        color: white;
         background-color: #0F4C75;
-        position: fixed;
+        padding: 10px 80px 20px 120px;
+        margin: 0;
+    }
 
-        height: 100vh;
+    &__container{
+        flex: 9;
+        display: flex;
+        flex-direction: row;
+        width: max-content;
+        &__sidebar{
+            flex: 1;
+            height: 100%;
+            background-color: #0F4C75;
+            margin-top: 0;
+            color:white;
 
-        &__title{
-            color: white;
-            text-align: center;
-            align-self: center;
-            margin-top: 50px;
-        }
-
-        &__list{
-            align-self: center;
-            margin-top: 10%;
             &__item{
-                color:white;
-                font-size: 25px;
-                font-weight: bold;
-            }
-        }
-        &__input{
-            align-self: center;
-            display: flex;
-            justify-content: flex-start;
-            gap: 20px;
-            width: 350px;
-            margin-top:32px;
+                padding: 16px 20px 24px 20px;
+                position: relative;
+                text-align: center;
+                
+                &--selected{
+                    background-color: #356d92;
+                }
+                &__description{
+                    font-size: 12px;
+                    color: white;
+                    position: absolute;
+                    left: 50%;
+                    bottom: 8px;
+                    transform:translateX(-50%);
+                }
 
-            &__text-field--wrapper{
-                background-color: white;
-                border-radius: 4px;
+                &:hover{
+                    cursor:pointer;
+                    box-shadow: 0px 0px 6px 2px rgb(255, 255, 255, 0.1);
+                }
             }
         }
     }
+
+
 }

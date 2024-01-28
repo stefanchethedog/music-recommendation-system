@@ -1,0 +1,17 @@
+
+.songs-form{
+    &__title{
+        color:white;
+        padding: 0;
+        margin-bottom: 8px;
+        margin-top: 12px;
+        text-align: center;
+        font-size: 30px;
+    }
+    &__field{
+        display: flex;
+        padding: 16px 20px;
+        justify-content: space-between;
+        gap: 32px;
+    }
+}
