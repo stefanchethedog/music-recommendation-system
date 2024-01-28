@@ -1,12 +1,14 @@
-import { FC } from 'react'
+import { FC } from "react";
+import { AlbumsForm } from "../../components";
+
+import "./Albums.styles.scss";
 
 const AlbumsPage: FC = () => {
-
-    return(
-        <div>
-            
-        </div>
-    )
-}
+  return (
+    <div className="albums-page">
+      <AlbumsForm />
+    </div>
+  );
+};
 
 export default AlbumsPage;

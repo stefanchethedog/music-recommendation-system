@@ -1,5 +1,12 @@
 
 .songs-form{
+    position: fixed;
+    background-color: #3282B8;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin-left: 64px;
+    padding-right: 5px;
     &__title{
         color:white;
         padding: 0;

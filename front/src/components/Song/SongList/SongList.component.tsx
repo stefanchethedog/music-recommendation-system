@@ -2,7 +2,7 @@ import { FC } from "react";
 import classNames from "classnames";
 
 import "./SongList.styles.scss";
-import Song, { SongProps } from "../Song/Song.component";
+import Song, { SongProps } from "../SongCard/Song.component";
 
 type SongListProps = {
   className?: String;

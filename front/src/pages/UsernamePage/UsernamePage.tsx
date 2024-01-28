@@ -15,7 +15,7 @@ type FormData = {
 
 interface IUsernamePage {
   setUsername: Dispatch<SetStateAction<String | null>>;
-  setId: Dispatch<SetStateAction<String | null>>;
+  setId: Dispatch<SetStateAction<string | null>>;
 }
 
 const UsernamePage: FC<IUsernamePage> = ({ setUsername, setId }) => {

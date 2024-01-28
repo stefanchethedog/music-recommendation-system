@@ -55,15 +55,6 @@ const sidebarObjects = [
 const Navbar: FC<NavbarProps> = ({ className, selected, setSelected }) => {
   const classes = classNames("navbar__container", className);
 
-
-  const generateBody = () => {
-    if (selected === 0) return <UserForm />;
-    if (selected === 1) return <ArtistForm />;
-    if (selected === 2) return <SongsForm />;
-    if (selected === 3) return <AlbumsForm />;
-    if (selected === 4) return <GenresForm />;
-  };
-
   return (
     <div className="navbar">
       <div className="navbar__container">

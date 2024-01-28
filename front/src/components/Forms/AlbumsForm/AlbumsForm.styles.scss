@@ -1,0 +1,24 @@
+.albums-form{
+    position: fixed;
+    background-color: #3282B8;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin-left: 64px;
+    padding-right: 5px;
+
+    &__title{
+        color:white;
+        padding: 0;
+        margin-bottom: 8px;
+        margin-top: 12px;
+        text-align: center;
+        font-size: 30px;
+    }
+    &__field{
+        display: flex;
+        padding: 16px 20px;
+        justify-content: space-between;
+        gap: 32px;
+    }
+}

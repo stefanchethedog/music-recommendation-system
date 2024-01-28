@@ -1,0 +1,17 @@
+.genre{
+    border-radius: 2px;
+    background-color: #0F4C75;
+    padding: 16px 30px 32px 30px;
+    display: flex;
+    flex-direction: column;
+
+    margin: 8px;
+    &__name{
+        font-weight: bold;
+        font-size: 20px;
+        align-self: center;
+        color:white;
+        text-wrap: nowrap;
+    }
+
+}

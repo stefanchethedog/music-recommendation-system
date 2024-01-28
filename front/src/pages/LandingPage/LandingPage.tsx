@@ -10,11 +10,11 @@ import GenresPage from "../GenresPage";
 import "./LandingPage.styles.scss";
 
 
-const LandingPage: FC<{id:String|null}> = ({id}) => {
+const LandingPage: FC<{id:string|null}> = ({id}) => {
   const [ selected, setSelected ] = useState(0);
 
   const generateBody = () => {
-    if(selected === 0) return <UserPage/>
+    if(selected === 0) return <UserPage userId={id}/>
     if(selected === 1) return <ArtistPage/>
     if(selected === 2) return <SongsPage/>
     if(selected === 3) return <AlbumsPage/>

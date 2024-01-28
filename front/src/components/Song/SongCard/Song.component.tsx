@@ -4,10 +4,10 @@ import classNames from "classnames";
 import "./Song.styles.scss";
 
 export type SongProps = {
-  className?: String;
   name: String;
   genres: String[];
   author: String;
+  className?: String;
 };
 
 const Song: FC<SongProps> = ({ className, name, genres, author }) => {

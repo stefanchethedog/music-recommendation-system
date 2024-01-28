@@ -15,7 +15,7 @@ const SongsForm: FC<SongsFormProps> = ({ className }) => {
   //U formi da se stavi ovo
   return (
     <div className={classNames}>
-      <h2 className="songs-form__title">Create new song</h2>
+      <h2 className="songs-form__title">Create a new song</h2>
       <div className="songs-form__field">
         <TextField
           variant="filled"
