@@ -15,8 +15,6 @@ public interface IUserRepository
   Task<User?> Update(string id, string username);
   Task<User?> AddLikesSong(string id, string songName);
   Task<User?> FollowUser(string id, string username);
-    Task<User?> Subscribe(string id, string name);
-
   Task<List<SongView>?> FindOtherUsersSongs(string id);
   Task<List<SongView>?> FindSongsByTheFollowedUsers(string id);
     Task<List<SongView>?> GetLikedSongs(string id);
