@@ -275,7 +275,7 @@ public class UserRepository : IUserRepository
                 MATCH (song:Song)
                 WHERE song.id IN $songIds
                 OPTIONAL MATCH (song)<-[:PERFORMS]-(artist:Artist)
-                OPTIONAL MATCH (song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                OPTIONAL MATCH (song)-[:IN_ALBUM]->(album:Album)
                 OPTIONAL MATCH (song)-[:IN_GENRE]->(genre:Genre)
                 RETURN
                     song.id AS Id,
@@ -288,7 +288,7 @@ public class UserRepository : IUserRepository
       {
         return rec.AsObject<SongView>();
       });
-      await _recService.SaveSongsToRedis(songs);
+      var recommendations = await _recService.GetRedisRecommendations(songs);
       return songs;
     });
   }
