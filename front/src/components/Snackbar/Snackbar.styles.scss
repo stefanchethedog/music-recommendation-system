@@ -1,0 +1,38 @@
+
+.snackbar{
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    background-color: #00CC00;
+    padding: 10px 10px 16px 40px;
+    border-radius: 4px;
+
+    &__message{
+        font-size: 22px;
+        color:white;
+        font-weight: bold;
+        margin-right: 20px;
+    }
+
+    &__icon{
+        margin-top: 5px;
+        color: white;
+        cursor: pointer;
+        border-radius: 50%;
+        padding: 2px;
+        &:hover{
+            background-color: rgba(0,0,0,0.05);
+        }
+    }
+
+    &__error{
+        background-color: red;
+    }
+}
