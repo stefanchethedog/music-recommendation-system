@@ -4,8 +4,19 @@
     padding: 16px 30px 32px 30px;
     display: flex;
     flex-direction: column;
-
+    position:relative;
     margin: 8px;
+
+
+    &__delete{
+        color: white;
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        cursor:pointer;
+        
+    }
+
     &__name{
         font-weight: bold;
         font-size: 20px;

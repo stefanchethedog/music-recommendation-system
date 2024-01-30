@@ -15,9 +15,11 @@ public interface IUserRepository
   Task<User?> Update(string id, string username);
   Task<User?> AddLikesSong(string id, string songName);
   Task<User?> FollowUser(string id, string username);
+  Task<User?> Subscribe(string id, string name);
+  
   Task<List<SongView>?> FindOtherUsersSongs(string id);
   Task<List<SongView>?> FindSongsByTheFollowedUsers(string id);
-    Task<List<SongView>?> GetLikedSongs(string id);
+  Task<List<SongView>?> GetLikedSongs(string id);
 }
 
 public class UserRepository : IUserRepository
@@ -290,4 +292,21 @@ public class UserRepository : IUserRepository
       return songs;
     });
   }
+  public async Task<User?> Subscribe(string id, string name){
+        var session = _driver.AsyncSession();
+        return await session.ExecuteWriteAsync(async (trans) => {
+            var cursor = await trans.RunAsync(@"
+                MATCH (user: User {id: $id})
+                MATCH (subscribe: Artist {name : $name})
+                MERGE (user)-[:SUBSCRIBED_TO]->(subscribe)
+                RETURN user, subscribe;
+            ", new { id, name });
+            if(await cursor.FetchAsync()){
+                return cursor.Current.AsObject<User>();
+            }
+            else { return null; }
+        });
+    }
 }
+
+    

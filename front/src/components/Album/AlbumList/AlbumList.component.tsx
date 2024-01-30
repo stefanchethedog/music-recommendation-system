@@ -3,6 +3,8 @@ import classNames from "classnames";
 import { AlbumProps } from "../AlbumCard/AlbumCard.component";
 import Album from "../AlbumCard";
 
+import "./AlbumList.styles.scss";
+
 type AlbumlistProps = {
   title: string;
   wrap?: boolean;

@@ -2,7 +2,6 @@ import { FC, useState } from "react";
 import classes from "classnames";
 import TextField from "@mui/material/TextField";
 import AddIcon from "@mui/icons-material/Add";
-import StarsIcon from "@mui/icons-material/Stars";
 import GetAppIcon from "@mui/icons-material/GetApp";
 
 import "./ArtistForm.styles.scss";

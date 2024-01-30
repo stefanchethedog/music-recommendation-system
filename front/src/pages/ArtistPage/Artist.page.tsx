@@ -32,7 +32,7 @@ const ArtistPage: FC = () => {
   return (
     <div className="artist-page">
       <ArtistForm handleLoadArtists={handleLoadArtists} />
-      {artists && <ArtistList title="All artists" artistsData={artists} className="artist-page__artist-list"/>}
+      {artists && artists.length > 0 && <ArtistList title="All artists" artistsData={artists} className="artist-page__artist-list"/>}
     </div>
   );
 };

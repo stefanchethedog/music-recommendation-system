@@ -39,9 +39,10 @@ public class ArtistRepository : IArtistRepository
         return await session.ExecuteWriteAsync(async trans =>
         {
             var cursor = await trans.RunAsync(@"
-                MATCH (a:Artist {id: $id}) 
-                WITH a, a.id AS id, a.name AS name 
-                DETACH DELETE a RETURN id, name;
+                MATCH (a:Artist {id: $id})
+                MATCH (a)-[:PERFORMS]->(song: Song)
+                WITH a, a.id AS id, a.name AS name, song 
+                DETACH DELETE a, song RETURN id, name;
             ", new { id });
             if (await cursor.FetchAsync())
             {

@@ -4,8 +4,18 @@
     padding: 16px 30px 32px 30px;
     display: flex;
     flex-direction: column;
-
+    position: relative;
     margin: 8px;
+
+    &__delete{
+        position:absolute;
+        color:white;
+        right: 6px;
+        top: 6px;
+        &:hover{
+            cursor: pointer;
+        }
+    }
     &__name{
         font-weight: bold;
         font-size: 20px;
