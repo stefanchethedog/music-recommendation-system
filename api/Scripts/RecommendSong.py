@@ -60,8 +60,47 @@ def create_query_table(query, queries, encoded_queries, extra_params={}):
 
 @route('/recommendations', method="POST")
 def index():
-    pprint(request.json)
-    return json.dumps(request.json)
+    songs = request.json
+    for song in songs:
+        description = f"{song['Name']} {song['Author']} {song['Album']} {' '.join(song['Genres'])}"
+        song["Description"] = description
+    pprint(request_songs)
+    pipeline = client.pipeline()
+    for i, song in enumerate(songs, start = 1):
+        key = f"song:{i:03}"
+        pipeline.json().set(key, '$', song)
+    res = pipeline.execute()
+    embedder = SentenceTransformer("msmarco-distilbert-base-v4")
+    keys = sorted(client.keys("song:*"))
+    descriptions = client.json().mget(keys, "$.Description")
+    descriptions = [item for sublist in descriptions for item in sublist]
+    embeddings = embedder.encode(descriptions).astype(np.float32).tolist()
+    VECTOR_DIMENSION = len(embeddings[0])
+    pipeline = client.pipeline()
+    for key, embedding in zip(keys, embeddings):
+        pipeline.json().set(key, $".Description_embeddings", embedding)
+    pipeline.execute()
+    schema = (
+        TextField("$.Name", no_stem=True, as_name="Name"),
+        TagField("$.Author", as_name="Author"),
+        TagField("$.Genres", as_name="Genres"),
+        TextField("$.Description", as_name="Description"),
+        VectorField(
+            "$.description_embeddings",
+            "FLAT",
+            {
+                "TYPE": "FLOAT32",
+                "DIM": VECTOR_DIMENSION,
+                "DISTANCE_METRIC": "COSINE",
+            },
+            as_name="vector",
+        ),
+    )
+    definition = IndexDefinition(prefix=["song:"], index_type=IndexType.JSON)
+    res = client.ft("idx:songs_vss").create_index(
+        fields=schema, definition=definition
+    )
+    return
 #def index():
 #    keys = client.keys("songs:*")
 #
