@@ -1,11 +1,18 @@
-import { FC, useState } from "react";
+import { Dispatch, FC, SetStateAction, useState } from "react";
 import classNames from "classnames";
-import { Button, TextField } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
-import Like from '@mui/icons-material/ThumbsUpDown'
-import axios from "axios";
-import { FOLLOW_USER, SUBSCRIBE_TO, LIKE_SONG } from "../../endpoints";
+import UserIcon from "@mui/icons-material/Person";
+import ArtistIcon from "@mui/icons-material/RecordVoiceOver";
+import SongsIcon from "@mui/icons-material/LibraryMusic";
+import AlbumIcon from "@mui/icons-material/Album";
+import HeadphonesIcon from "@mui/icons-material/Headphones";
+
+import {
+  UserForm,
+  AlbumsForm,
+  ArtistForm,
+  GenresForm,
+  SongsForm,
+} from "../Forms";
 
 import "./Navbar.styles.scss";
 
@@ -15,119 +22,60 @@ type NavbarItem = {
 };
 
 type NavbarProps = {
-  className?: String;
-  listItems: NavbarItem[];
+  selected: number,
+  setSelected: Dispatch<SetStateAction<number>>,
   id: String | null;
+  listItems: NavbarItem[];
+  className?: String;
 };
 
-const Navbar: FC<NavbarProps> = ({ className, listItems, id }) => {
+const sidebarObjects = [
+  {
+    title: "User",
+    icon: <UserIcon />,
+  },
+  {
+    title: "Artist",
+    icon: <ArtistIcon />,
+  },
+  {
+    title: "Songs",
+    icon: <SongsIcon />,
+  },
+  {
+    title: "Albums",
+    icon: <AlbumIcon />,
+  },
+  {
+    title: "Genres",
+    icon: <HeadphonesIcon />,
+  },
+];
+
+const Navbar: FC<NavbarProps> = ({ className, selected, setSelected }) => {
   const classes = classNames("navbar__container", className);
 
-  const [usernameToFollow, setUsernameToFollow] = useState<String>("");
-  const [nameOfArtist, setNameOfArtist] = useState<String>("");
-  const [nameOfSong, setNameOfSong] = useState<String>("");
-
-
-
-  const handleSubmitFollow = async () => {
-    if (id)
-      await axios
-        .post(FOLLOW_USER(id, usernameToFollow))
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-  };
-
-  const handleSubmitSubscribe = async () => {
-    if (id)
-      await axios
-        .post(SUBSCRIBE_TO(id, nameOfArtist))
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-  }
-
-  const handleAddLikedSong = async() =>{
-    if (id)
-      await axios
-        .post(LIKE_SONG(id, nameOfSong))
-        .then((res) => {
-          console.log(res);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-  }
-
   return (
-    <div className={classes}>
-      <h1 className="navbar__container__title">SONG RECOMMENDER</h1>
-      <div className="navbar__container__list">
-        {listItems.map((current, index) => {
-          return (
-            <div className="navbar__container__list__item">
-              {current.label}: {current.value}
+    <div className="navbar">
+      <div className="navbar__container">
+        <div className="navbar__container__sidebar">
+          {sidebarObjects.map((current, index) => (
+            <div
+              className={`navbar__container__sidebar__item navbar__container__sidebar__item${
+                index === selected ? "--selected" : ""
+              }`}
+              onClick={() => {
+                setSelected(index);
+              }}
+              id={`navbar__sidebar${index}`}
+            >
+              {current.icon}
+              <small className="navbar__container__sidebar__item__description">
+                {current.title}
+              </small>
             </div>
-          );
-        })}
-      </div>
-      <div className="navbar__container__input">
-        <div className="navbar__container__input__text-field--wrapper">
-          <TextField
-            variant="filled"
-            className="navbar__container__input__text-field"
-            label="Username"
-            onChange={(e) => {
-              setUsernameToFollow(e.target.value);
-              console.log(e.target.value);
-            }}
-          />
+          ))}
         </div>
-        <Button
-          variant="contained"
-          endIcon={<AddIcon />}
-          onClick={handleSubmitFollow}
-        >
-          Follow
-        </Button>
-      </div>
-      <div className="navbar__container__input">
-        <div className="navbar__container__input__text-field--wrapper">
-          <TextField
-            variant="filled"
-            className="navbar__container__input__text-field"
-            label="Author"
-            onChange={(e)=>{
-              setNameOfArtist(e.target.value)
-              console.log(e.target.value)
-            }}
-          />
-        </div>
-        <Button variant="contained" endIcon={<BookmarkIcon />} onClick={handleSubmitSubscribe}>
-          Subscribe
-        </Button>
-      </div>
-      <div className="navbar__container__input">
-        <div className="navbar__container__input__text-field--wrapper">
-          <TextField
-            variant="filled"
-            className="navbar__container__input__text-field"
-            label="Song"
-            onChange={(e)=>{
-              setNameOfSong(e.target.value)
-              console.log(e.target.value)
-            }}
-          />
-        </div>
-        <Button variant="contained" endIcon={<Like />} onClick={handleAddLikedSong}>
-          Like
-        </Button>
       </div>
     </div>
   );

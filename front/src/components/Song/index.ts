@@ -1,3 +1,4 @@
-import Song from "./Song.component";
+import Song from "./SongCard";
+import SongList from "./SongList";
 
-export default Song;
+export {SongList, Song as SongCard};

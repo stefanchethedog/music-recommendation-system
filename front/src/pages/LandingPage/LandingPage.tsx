@@ -1,61 +1,36 @@
-import { FC, useEffect, useState } from "react";
-import Button from "@mui/material/Button";
-import axios from 'axios'
+import { FC, useState } from "react";
 
-import { GET_LIKED_SONGS, GET_RECOMMENDED_SONGS } from "../../endpoints";
 import { Navbar, Song, SongList } from "../../components";
+import UserPage from "../UserPage";
+import ArtistPage from "../ArtistPage";
+import SongsPage from "../SongsPage";
+import AlbumsPage from "../AlbumsPage";
+import GenresPage from "../GenresPage";
 
 import "./LandingPage.styles.scss";
-import { SongProps } from "../../components/Song/Song.component";
 
 
-const LandingPage: FC<{id:String|null}> = ({id}) => {
-  const [ songs, setSongs ] = useState<Omit<SongProps[], 'className'>>();
-  const [ likedSongs, setLikedSongs ] = useState<Omit<SongProps[], 'className'>>();
+const LandingPage: FC<{id:string|null}> = ({id}) => {
+  const [ selected, setSelected ] = useState(0);
 
-  const handleLoadRecommendedSongs = async() =>{
-    if (id)
-      await axios
-        .get(GET_RECOMMENDED_SONGS(id))
-        .then((res) => {
-          setSongs(res.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+  const generateBody = () => {
+    if(selected === 0) return <UserPage userId={id}/>
+    if(selected === 1) return <ArtistPage/>
+    if(selected === 2) return <SongsPage/>
+    if(selected === 3) return <AlbumsPage/>
+    if(selected === 4) return <GenresPage/>
   }
-
-  const handleLoadLikedSongs = async() =>{
-    if (id)
-      await axios
-        .get(GET_LIKED_SONGS(id))
-        .then((res) => {
-          setLikedSongs(res.data);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-  }
-
-  useEffect(()=>{
-    const load = async () =>{
-      await handleLoadRecommendedSongs()
-      await handleLoadLikedSongs()
-    }
-    load()
-  } , []);
 
   return (
     <div className="landing-page__container">
       <Navbar
+        selected={selected}
+        setSelected={setSelected}
         className="landing-page__container__navbar"
         listItems={[{ label: "Username", value: "Stefanche" }]}
         id={id}
       />
-      <div className="landing-page__container__body">
-        <SongList title="Recommended songs" songData={songs}/>
-        <SongList title="Liked songs" songData={likedSongs}/>
-      </div>
+      {generateBody()}
     </div>
   );
 };
