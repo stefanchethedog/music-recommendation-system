@@ -41,6 +41,8 @@ def create_query_table(query, queries, encoded_queries, extra_params={}):
             )
             .docs
         )
+        print("result docs")
+        pprint(result_docs)
         for doc in result_docs:
             vector_score = round(1 - float(doc.vector_score), 2)
             results_list.append(
@@ -64,7 +66,6 @@ def index():
     for song in songs:
         description = f"{song['Name']} {song['Author']} {song['Album']} {' '.join(song['Genres'])}"
         song["Description"] = description
-    pprint(request_songs)
     pipeline = client.pipeline()
     for i, song in enumerate(songs, start = 1):
         key = f"song:{i:03}"
@@ -78,29 +79,44 @@ def index():
     VECTOR_DIMENSION = len(embeddings[0])
     pipeline = client.pipeline()
     for key, embedding in zip(keys, embeddings):
-        pipeline.json().set(key, $".Description_embeddings", embedding)
+        pipeline.json().set(key, "$.Description_embeddings", embedding)
     pipeline.execute()
-    schema = (
-        TextField("$.Name", no_stem=True, as_name="Name"),
-        TagField("$.Author", as_name="Author"),
-        TagField("$.Genres", as_name="Genres"),
-        TextField("$.Description", as_name="Description"),
-        VectorField(
-            "$.description_embeddings",
-            "FLAT",
-            {
-                "TYPE": "FLOAT32",
-                "DIM": VECTOR_DIMENSION,
-                "DISTANCE_METRIC": "COSINE",
-            },
-            as_name="vector",
-        ),
+    #NOTE: the following code block should be run only once at the database startup ( NOT THE SCRIPT STARTUP )
+    #schema = (
+    #    TextField("$.Name", no_stem=True, as_name="Name"),
+    #    TagField("$.Author", as_name="Author"),
+    #    TagField("$.Genres", as_name="Genres"),
+    #    TextField("$.Description", as_name="Description"),
+    #    VectorField(
+    #        "$.description_embeddings",
+    #        "FLAT",
+    #        {
+    #            "TYPE": "FLOAT32",
+    #            "DIM": VECTOR_DIMENSION,
+    #            "DISTANCE_METRIC": "COSINE",
+    #        },
+    #        as_name="vector",
+    #    ),
+    #)
+    #definition = IndexDefinition(prefix=["song:"], index_type=IndexType.JSON)
+    #res = client.ft("idx:songs_vss").create_index(
+    #    fields=schema, definition=definition
+    #)
+    #info = client.ft("idx:songs_vss").info()
+    #num_docs = info["num_docs"]
+    #indexing_failures = info["hash_indexing_failures"]
+    #print(f"docs: {num_docs} failures: {indexing_failures}")
+    queries = list(map(lambda song: f"{song['Name']} {song['Author']} {song['Album']} {' '.join(song['Genres'])}", songs))
+    encoded_queries = embedder.encode(queries)
+    query = (
+        Query('(*)=>[KNN 3 @vector $query_vector AS vector_score]')
+         .sort_by('vector_score')
+         .return_fields('vector_score', 'Name', 'Author', 'Genres', 'Description', 'Album')
+         .dialect(2)
     )
-    definition = IndexDefinition(prefix=["song:"], index_type=IndexType.JSON)
-    res = client.ft("idx:songs_vss").create_index(
-        fields=schema, definition=definition
-    )
-    return
+    results = create_query_table(query, queries, encoded_queries)
+    pprint(results)
+    return results
 #def index():
 #    keys = client.keys("songs:*")
 #
