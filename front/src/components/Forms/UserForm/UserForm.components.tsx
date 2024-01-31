@@ -15,6 +15,7 @@ import useSnackbar from "../../../Hooks/useSnackbar";
 
 type UserFormProps = {
   handleLoadUsers: () => void;
+  handleLoadRecommendedSongs: () => void;
   userId: string | null;
   className?: String;
 };
@@ -22,6 +23,7 @@ type UserFormProps = {
 const UserForm: FC<UserFormProps> = ({
   className,
   handleLoadUsers,
+  handleLoadRecommendedSongs,
   userId,
 }) => {
   const classNames = classes("user-form", className);
@@ -147,8 +149,7 @@ const UserForm: FC<UserFormProps> = ({
         <Button
           variant="contained"
           className="user-form__field__button"
-          endIcon={<StarsIcon />}
-          startIcon={<StarsIcon />}
+          endIcon={<AddIcon />}
           sx={{
             width: "100%",
             height: "50px",
@@ -175,6 +176,21 @@ const UserForm: FC<UserFormProps> = ({
           onClick={handleCreateUser}
         >
           create
+        </Button>
+      </div>
+      <div className="user-form__field">
+        <Button
+          variant="contained"
+          className="user-form__field__button"
+          endIcon={<StarsIcon/>}
+          startIcon ={<StarsIcon/>}
+          sx={{
+            width: "100%",
+            height: "50px",
+          }}
+          onClick={handleLoadRecommendedSongs}
+        >
+          Get recommended songs
         </Button>
       </div>
     </div>

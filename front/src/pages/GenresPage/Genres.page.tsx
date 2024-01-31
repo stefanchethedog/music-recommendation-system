@@ -32,7 +32,7 @@ const GenresPage: FC = () => {
   return (
     <div className="genres-page">
       <GenresForm handleLoadGenres={handleLoadGenres}/>
-      {genres && <GenresList title="All genres" genresData={genres} className="genres-page__genres-list"/>}
+      {genres && genres.length > 0 && <GenresList title="All genres" genresData={genres} className="genres-page__genres-list"/>}
     </div>
   );
 };
