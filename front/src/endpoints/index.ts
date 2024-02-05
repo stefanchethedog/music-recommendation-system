@@ -11,7 +11,7 @@ const SUBSCRIBE_TO = (id: String, name: String) =>
 const LIKE_SONG = (id: String, name: String) =>
   `${BASE_URI}/users/AddUserLikesSong?id=${id}&songName=${name}`;
 const GET_RECOMMENDED_SONGS = (id: String) =>
-  `${BASE_URI}/users/RecommendSongsByLikedSongs?id=${id}`;
+  `${BASE_URI}/users/GetRecommendedSongsByFollowingUsers?id=${id}`;
 const GET_LIKED_SONGS = (id: String) =>
   `${BASE_URI}/users/getLikedSongs?id=${id}`;
 const CREATE_USER = `${BASE_URI}/users`;
