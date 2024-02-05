@@ -11,7 +11,7 @@ import "./Song.styles.scss";
 export type SongProps = {
   id: String;
   name: String;
-  genres: String[];
+  genres?: String[];
   author: String;
   album?: String;
   className?: String;
@@ -43,7 +43,7 @@ const Song: FC<SongProps> = ({ className, name, genres, author, album, id }) => 
       <div className="song__container__author">{author}</div>
       {album && <div className="song__container__author">{album}</div>}
       <div className="song__container__genres">
-        {genres.map((genre) => (
+        {genres && genres.map((genre) => (
           <div className="song__container__genres__genre">{genre} </div>
         ))}
       </div>

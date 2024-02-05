@@ -9,14 +9,15 @@ public interface IUserRepository
 {
   Task<IEnumerable<User>> FindAll();
   Task<User?> FindOne(string id);
-    Task<User?> FindUserByUsername(string username);
+  Task<User?> FindUserByUsername(string username);
   Task<User> Create(User user);
   Task<User?> Delete(string id);
   Task<User?> Update(string id, string username);
   Task<User?> AddLikesSong(string id, string songName);
   Task<User?> FollowUser(string id, string username);
   Task<User?> Subscribe(string id, string name);
-  
+  Task<List<SongView>> FindMySongs(string id);
+
   Task<List<SongView>?> FindOtherUsersSongs(string id);
   Task<List<SongView>?> FindSongsByTheFollowedUsers(string id);
   Task<List<SongView>?> GetLikedSongs(string id);
@@ -38,8 +39,7 @@ public class UserRepository : IUserRepository
     {
       var cursor = await trans.RunAsync(@"
                 CREATE (u:User {id: $id, username: $username}) 
-                RETURN u {.id, .username};
-            ", new { id = user.Id, username = user.Username });
+                RETURN u {.id, .username}; ", new { id = user.Id, username = user.Username });
       return await cursor.SingleAsync(rec => rec.AsObject<User>());
     });
   }
@@ -79,14 +79,14 @@ public class UserRepository : IUserRepository
     });
   }
 
-    public async Task<List<SongView>?> GetLikedSongs(string id)
-    {
-         var session = _driver.AsyncSession();
-        return await session.ExecuteWriteAsync(
-            async (trans) =>
-            {
-                var cursor = await trans.RunAsync(
-                    @"
+  public async Task<List<SongView>?> GetLikedSongs(string id)
+  {
+    var session = _driver.AsyncSession();
+    return await session.ExecuteWriteAsync(
+        async (trans) =>
+        {
+          var cursor = await trans.RunAsync(
+                  @"
                 MATCH (user: User { id: $id })
                 MATCH (song: Song)<-[:USER_LIKES_SONG]-(user)
                 MATCH (artist: Artist)-[:PERFORMS]->(song)
@@ -100,16 +100,16 @@ public class UserRepository : IUserRepository
                     album.name AS album,
                     COLLECT(genre.name) AS genres;
             ",
-                    new { id }
-                );
-                return await cursor.ToListAsync(rec =>
-                {
-                    return rec.AsObject<SongView>();
-                    ;
-                });
-            }
-        );
-    }
+                  new { id }
+              );
+          return await cursor.ToListAsync(rec =>
+              {
+                return rec.AsObject<SongView>();
+                ;
+              });
+        }
+    );
+  }
   public async Task<User?> FindOne(string id)
   {
     var session = _driver.AsyncSession();
@@ -127,22 +127,22 @@ public class UserRepository : IUserRepository
     });
   }
 
-    public async Task<User?> FindUserByUsername(string username)
+  public async Task<User?> FindUserByUsername(string username)
+  {
+    var session = _driver.AsyncSession();
+    return await session.ExecuteReadAsync(async (trans) =>
     {
-        var session = _driver.AsyncSession();
-        return await session.ExecuteReadAsync(async (trans) =>
-        {
-            var cursor = await trans.RunAsync(@"
+      var cursor = await trans.RunAsync(@"
                 MATCH (u:User) WHERE u.username = $username 
                 RETURN u {.id, .username}
             ", new { username });
-            if (await cursor.FetchAsync())
-            {
-                return cursor.Current.AsObject<User>();
-            }
-            else { return null; }
-        });
-    }
+      if (await cursor.FetchAsync())
+      {
+        return cursor.Current.AsObject<User>();
+      }
+      else { return null; }
+    });
+  }
 
   public async Task<User?> Update(string id, string username)
   {
@@ -183,11 +183,12 @@ public class UserRepository : IUserRepository
     });
   }
 
-    public async Task<User?> FollowUser(string id, string username)
+  public async Task<User?> FollowUser(string id, string username)
+  {
+    var session = _driver.AsyncSession();
+    return await session.ExecuteWriteAsync(async (trans) =>
     {
-        var session = _driver.AsyncSession();
-        return await session.ExecuteWriteAsync(async (trans) => {
-            var cursor = await trans.RunAsync(@"
+      var cursor = await trans.RunAsync(@"
                 MATCH (user: User {id: $id})
                 MATCH (userToFollow: User {username : $username})
                 MERGE (user)-[:FOLLOWS]->(userToFollow)
@@ -247,6 +248,32 @@ public class UserRepository : IUserRepository
     });
   }
 
+  public async Task<List<SongView>> FindMySongs(string id)
+  {
+    var session = _driver.AsyncSession();
+    List<SongView> queryResult = await session.ExecuteReadAsync(async (trans) =>
+    {
+      var cursor = await trans.RunAsync(@"
+                MATCH (user: User {id: $id})-[:USER_LIKES_SONG]->(song:Song)
+                OPTIONAL MATCH (song)<-[:PERFORMS]-(artist:Artist)
+                OPTIONAL MATCH (song)-[:SONG_BELONGS_TO_ALBUM]->(album:Album)
+                OPTIONAL MATCH (song)-[:IN_GENRE]->(genre:Genre)
+                RETURN
+                    song.id AS Id,
+                    song.name AS Name,
+                    artist.name AS Author,
+                    album.name AS Album,
+                    COLLECT(genre.name) AS Genres
+            ", new { id });
+      return await cursor.ToListAsync(rec =>
+      {
+        return rec.AsObject<SongView>();
+        ;
+      });
+    });
+    return queryResult;
+  }
+
   public async Task<List<SongView>?> FindSongsByTheFollowedUsers(string id)
   {
     var session = _driver.AsyncSession();
@@ -265,6 +292,8 @@ public class UserRepository : IUserRepository
         ;
       });
     });
+
+    var mySongs = await FindOtherUsersSongs(id);
 
     var songIds = queryResult.Select(song => song.Id).ToList();
     if (songIds.Count == 0) return null;
@@ -288,25 +317,36 @@ public class UserRepository : IUserRepository
       {
         return rec.AsObject<SongView>();
       });
-      var recommendations = await _recService.GetRedisRecommendations(songs);
-      return songs;
+      var recommendations = await _recService.GetRedisRecommendations(songs.Select((song) => $"{song.Name} {song.Author} {song.Album} {string.Join(' ', song.Genres)}").ToList(), mySongs!);
+      List<SongView> newRecommendations = recommendations.Select((r) =>
+      {
+        var o = new SongView();
+        o.Album = r.Album;
+        o.Author = r.Author;
+        o.Name = r.Name;
+        return o;
+      }).ToList();
+      return newRecommendations;
     });
   }
-  public async Task<User?> Subscribe(string id, string name){
-        var session = _driver.AsyncSession();
-        return await session.ExecuteWriteAsync(async (trans) => {
-            var cursor = await trans.RunAsync(@"
+  public async Task<User?> Subscribe(string id, string name)
+  {
+    var session = _driver.AsyncSession();
+    return await session.ExecuteWriteAsync(async (trans) =>
+    {
+      var cursor = await trans.RunAsync(@"
                 MATCH (user: User {id: $id})
                 MATCH (subscribe: Artist {name : $name})
                 MERGE (user)-[:SUBSCRIBED_TO]->(subscribe)
                 RETURN user, subscribe;
             ", new { id, name });
-            if(await cursor.FetchAsync()){
-                return cursor.Current.AsObject<User>();
-            }
-            else { return null; }
-        });
-    }
+      if (await cursor.FetchAsync())
+      {
+        return cursor.Current.AsObject<User>();
+      }
+      else { return null; }
+    });
+  }
 }
 
-    
+
