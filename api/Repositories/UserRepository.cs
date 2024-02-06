@@ -277,32 +277,18 @@ public class UserRepository : IUserRepository
   public async Task<List<SongView>?> FindSongsByTheFollowedUsers(string id)
   {
     var session = _driver.AsyncSession();
-    List<Song> queryResult = await session.ExecuteReadAsync(async (trans) =>
-    {
-      var cursor = await trans.RunAsync(@"
-                MATCH (user: User {id: $id})-[:FOLLOWS]->(followingUser: User)
-                WITH user, followingUser
-                MATCH (followingUser)-[:USER_LIKES_SONG]->(song: Song)
-                WHERE NOT (user)-[:USER_LIKES_SONG]->(song)
-                RETURN DISTINCT song
-            ", new { id });
-      return await cursor.ToListAsync(rec =>
-      {
-        return rec.AsObject<Song>();
-        ;
-      });
-    });
 
-    var mySongs = await FindOtherUsersSongs(id);
+    var songs = await FindOtherUsersSongs(id);
+    if(songs == null) return null;
 
-    var songIds = queryResult.Select(song => song.Id).ToList();
+    var songIds = songs.Select(song => song.Id).ToList();
     if (songIds.Count == 0) return null;
 
     return await session.ExecuteReadAsync(async (trans) =>
     {
       var cursor = await trans.RunAsync(@"
-                MATCH (song:Song)
-                WHERE song.id IN $songIds
+                MATCH (song:Song)<-[:USER_LIKES_SONG]-(user: User {id: $id})
+                WHERE NOT song.id IN $songIds
                 OPTIONAL MATCH (song)<-[:PERFORMS]-(artist:Artist)
                 OPTIONAL MATCH (song)-[:IN_ALBUM]->(album:Album)
                 OPTIONAL MATCH (song)-[:IN_GENRE]->(genre:Genre)
@@ -312,12 +298,12 @@ public class UserRepository : IUserRepository
                     artist.name AS Author,
                     album.name AS Album,
                     COLLECT(genre.name) AS Genres
-            ", new { songIds });
-      var songs = await cursor.ToListAsync(rec =>
+            ", new { songIds, id });
+      var mySongs = await cursor.ToListAsync(rec =>
       {
         return rec.AsObject<SongView>();
       });
-      var recommendations = await _recService.GetRedisRecommendations(songs.Select((song) => $"{song.Name} {song.Author} {song.Album} {string.Join(' ', song.Genres)}").ToList(), mySongs!);
+      var recommendations = await _recService.GetRedisRecommendations(mySongs.Select((song) => $"{song.Name} {song.Author} {song.Album} {string.Join(' ', song.Genres)}").ToList(), songs!);
       List<SongView> newRecommendations = recommendations.Select((r) =>
       {
         var o = new SongView();
